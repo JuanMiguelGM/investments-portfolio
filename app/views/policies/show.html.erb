@@ -1,0 +1,113 @@
+<% content_for(:title, "#{@policy.name} — Investments Portfolio") %>
+
+<div class="mb-4">
+  <%= link_to "&larr; Back to Dashboard".html_safe, root_path, class: "text-indigo-600 hover:text-indigo-800 text-sm" %>
+</div>
+
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-800"><%= @policy.name %></h1>
+    <p class="text-sm text-gray-500">Since <%= @policy.inception_date.strftime("%B %Y") %></p>
+  </div>
+  <%= link_to "Edit Holdings", edit_holding_path(@policy), class: "bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700" %>
+</div>
+
+<!-- Metrics -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Value</p>
+    <p class="text-2xl font-bold"><%= format_euro(@calculator.current_value) %></p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Contributed</p>
+    <p class="text-2xl font-bold"><%= format_euro(@calculator.total_contributed) %></p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Gain</p>
+    <p class="text-xl font-bold <%= gain_color(@calculator.total_gain) %>">
+      <%= gain_sign(@calculator.total_gain) %><%= format_euro(@calculator.total_gain) %>
+      <span class="text-sm">(<%= gain_sign(@calculator.total_gain_pct) %><%= format_pct(@calculator.total_gain_pct) %>)</span>
+    </p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Daily Change</p>
+    <p class="text-xl font-bold <%= gain_color(@calculator.daily_change) %>">
+      <%= gain_sign(@calculator.daily_change) %><%= format_euro(@calculator.daily_change) %>
+    </p>
+  </div>
+</div>
+
+<!-- Chart -->
+<div class="bg-white rounded-xl shadow p-5 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-800">Policy Value</h2>
+    <div class="flex space-x-1">
+      <% %w[1M 3M 6M YTD 1Y 3Y ALL].each do |period| %>
+        <% active = period == @period %>
+        <% css = active ? "bg-indigo-600 text-white" : "bg-white text-gray-700 hover:bg-gray-100" %>
+        <%= link_to period, policy_path(@policy.slug, period: period), class: "px-3 py-1 rounded-md text-sm font-medium #{css}" %>
+      <% end %>
+    </div>
+  </div>
+  <% if @chart_data.any? %>
+    <%= line_chart @chart_data, prefix: "\u20AC", thousands: ".", decimal: ",", discrete: true, library: { scales: { y: { beginAtZero: false } } } %>
+  <% else %>
+    <p class="text-gray-400 text-center py-12">No data for this period.</p>
+  <% end %>
+</div>
+
+<!-- Holdings -->
+<% if @holdings.any? %>
+  <div class="bg-white rounded-xl shadow p-5 mb-6">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Holdings</h2>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="pb-2">Fund</th>
+          <th class="pb-2 text-right">Units</th>
+          <th class="pb-2 text-right">NAV</th>
+          <th class="pb-2 text-right">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @holdings.each do |holding| %>
+          <tr class="border-b border-gray-100">
+            <td class="py-2">
+              <%= link_to holding.fund.name, fund_path(holding.fund), class: "text-indigo-600 hover:text-indigo-800" %>
+            </td>
+            <td class="py-2 text-right font-mono"><%= number_with_precision(holding.units, precision: 6) %></td>
+            <td class="py-2 text-right"><%= format_euro(holding.fund.latest_nav_value) %></td>
+            <td class="py-2 text-right font-medium"><%= format_euro(holding.current_value) %></td>
+          </tr>
+        <% end %>
+        <tr class="font-bold">
+          <td class="py-2" colspan="3">Total</td>
+          <td class="py-2 text-right"><%= format_euro(@calculator.current_value) %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
+<!-- Contribution History -->
+<% if @contributions.any? %>
+  <div class="bg-white rounded-xl shadow p-5">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Contributions</h2>
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="pb-2">Date</th>
+          <th class="pb-2 text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @contributions.each do |contribution| %>
+          <tr class="border-b border-gray-100">
+            <td class="py-2"><%= contribution.contribution_date.strftime("%d/%m/%Y") %></td>
+            <td class="py-2 text-right font-medium"><%= format_euro(contribution.amount) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

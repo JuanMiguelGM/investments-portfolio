@@ -1,0 +1,183 @@
+<% content_for(:title, "Dashboard — Investments Portfolio") %>
+
+<% unless @has_data %>
+  <div class="bg-white rounded-xl shadow p-8 text-center mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">Welcome to your Portfolio Dashboard</h2>
+    <p class="text-gray-600 mb-6">Get started by completing these steps:</p>
+    <ol class="text-left max-w-md mx-auto space-y-3">
+      <li class="flex items-center space-x-3">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">1</span>
+        <span class="text-gray-700">Import your CSV data: place <code class="bg-gray-100 px-1 rounded">portfolio.csv</code> in <code class="bg-gray-100 px-1 rounded">tmp/imports/</code></span>
+      </li>
+      <li class="flex items-center space-x-3">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">2</span>
+        <span class="text-gray-700">
+          <%= button_to "Import CSV", admin_import_path, method: :post, class: "text-indigo-600 underline cursor-pointer" %>
+        </span>
+      </li>
+      <li class="flex items-center space-x-3">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">3</span>
+        <span class="text-gray-700">Enter your current holdings for each policy</span>
+      </li>
+      <li class="flex items-center space-x-3">
+        <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-bold">4</span>
+        <span class="text-gray-700">Fetch latest prices from Yahoo Finance</span>
+      </li>
+    </ol>
+  </div>
+<% end %>
+
+<% if @pending_contributions.any? %>
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+    <h3 class="text-sm font-semibold text-amber-800 mb-3">Pending Contributions</h3>
+    <div class="space-y-3">
+      <% @pending_contributions.each do |pending| %>
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-amber-900"><%= pending[:policy].name %></p>
+            <p class="text-xs text-amber-700">
+              <%= pending[:suggested_date].strftime("%B %Y") %> &mdash; suggested <%= format_euro(pending[:suggested_amount]) %> (same as last month)
+            </p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <%= button_to "Confirm",
+                contributions_path,
+                method: :post,
+                params: { contribution: { policy_id: pending[:policy].id,
+                                          contribution_date: pending[:suggested_date],
+                                          amount: pending[:suggested_amount] } },
+                class: "bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-amber-700 cursor-pointer" %>
+            <%= link_to "Edit",
+                new_contribution_path(policy_id: pending[:policy].id,
+                                      contribution_date: pending[:suggested_date],
+                                      amount: pending[:suggested_amount]),
+                class: "bg-white border border-amber-300 text-amber-700 px-3 py-1.5 rounded text-xs font-medium hover:bg-amber-50" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<!-- Hero Metrics -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Total Value</p>
+    <p class="text-2xl font-bold text-gray-900"><%= format_euro(@calculator.current_value) %></p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Total Gain</p>
+    <p class="text-2xl font-bold <%= gain_color(@calculator.total_gain) %>">
+      <%= gain_sign(@calculator.total_gain) %><%= format_euro(@calculator.total_gain) %>
+      <span class="text-sm">(<%= gain_sign(@calculator.total_gain_pct) %><%= format_pct(@calculator.total_gain_pct) %>)</span>
+    </p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Daily Change</p>
+    <p class="text-xl font-bold <%= gain_color(@calculator.daily_change) %>">
+      <%= gain_sign(@calculator.daily_change) %><%= format_euro(@calculator.daily_change) %>
+      <span class="text-sm">(<%= gain_sign(@calculator.daily_change_pct) %><%= format_pct(@calculator.daily_change_pct) %>)</span>
+    </p>
+  </div>
+  <div class="bg-white rounded-xl shadow p-5">
+    <p class="text-sm text-gray-500">Annualized Return</p>
+    <p class="text-xl font-bold <%= gain_color(@calculator.annualized_return) %>">
+      <%= gain_sign(@calculator.annualized_return) %><%= format_pct(@calculator.annualized_return) %>
+    </p>
+  </div>
+</div>
+
+<!-- Period Selector + Chart -->
+<div class="bg-white rounded-xl shadow p-5 mb-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-800">Portfolio Value</h2>
+    <div class="flex space-x-1">
+      <%= period_links(@period) %>
+    </div>
+  </div>
+  <% if @chart_data.any? %>
+    <%= line_chart @chart_data, prefix: "\u20AC", thousands: ".", decimal: ",", discrete: true, library: { scales: { y: { beginAtZero: false } } } %>
+  <% else %>
+    <p class="text-gray-400 text-center py-12">No data yet. Import CSV or fetch prices to see the chart.</p>
+  <% end %>
+</div>
+
+<!-- Policy Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  <% @policies.each do |policy| %>
+    <% calc = Portfolio::ValueCalculator.new(policy: policy) %>
+    <div class="bg-white rounded-xl shadow p-5">
+      <div class="flex items-center justify-between mb-3">
+        <%= link_to policy.name, policy_path(policy.slug), class: "text-lg font-semibold text-indigo-700 hover:text-indigo-900" %>
+        <div class="flex items-center space-x-3">
+          <% if policy.pension? %>
+            <%= link_to "Enter NAV", new_admin_nav_entry_path, class: "text-sm text-amber-600 hover:text-amber-800" %>
+          <% end %>
+          <%= link_to "Edit Holdings", edit_holding_path(policy), class: "text-sm text-indigo-500 hover:text-indigo-700" %>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 text-sm">
+        <div>
+          <p class="text-gray-500">Value</p>
+          <p class="font-semibold"><%= format_euro(calc.current_value) %></p>
+        </div>
+        <div>
+          <p class="text-gray-500">Contributed</p>
+          <p class="font-semibold"><%= format_euro(calc.total_contributed) %></p>
+        </div>
+        <div>
+          <p class="text-gray-500">Gain</p>
+          <p class="font-semibold <%= gain_color(calc.total_gain) %>">
+            <%= gain_sign(calc.total_gain) %><%= format_euro(calc.total_gain) %>
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<!-- Fund Allocation Table -->
+<div class="bg-white rounded-xl shadow p-5">
+  <h2 class="text-lg font-semibold text-gray-800 mb-4">Fund Allocation</h2>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="pb-2">Fund</th>
+          <th class="pb-2 text-right">Allocation</th>
+          <th class="pb-2 text-right">Latest NAV</th>
+          <th class="pb-2 text-right">Daily Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @funds.each do |fund| %>
+          <% nav = fund.latest_nav %>
+          <tr class="border-b border-gray-100">
+            <td class="py-2">
+              <%= link_to fund.name, fund_path(fund), class: "text-indigo-600 hover:text-indigo-800" %>
+            </td>
+            <td class="py-2 text-right"><%= format_pct(fund.allocation_pct) %></td>
+            <td class="py-2 text-right">
+              <% if nav %>
+                <%= format_euro(nav.nav) %>
+              <% elsif fund.yahoo_ticker.nil? %>
+                <%= link_to "Enter NAV", new_admin_nav_entry_path, class: "text-amber-600 hover:text-amber-800 text-xs" %>
+              <% else %>
+                ---
+              <% end %>
+            </td>
+            <td class="py-2 text-right <%= gain_color(nav&.daily_change_pct) %>">
+              <% if nav&.daily_change_pct %>
+                <%= gain_sign(nav.daily_change_pct) %><%= format_pct(nav.daily_change_pct) %>
+              <% elsif fund.yahoo_ticker.nil? %>
+                <span class="text-gray-400 text-xs">manual</span>
+              <% else %>
+                ---
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
