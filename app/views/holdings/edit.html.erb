@@ -1,0 +1,39 @@
+<% content_for(:title, "Edit Holdings — #{@policy.name}") %>
+
+<div class="mb-4">
+  <%= link_to "&larr; Back to Policy".html_safe, policy_path(@policy.slug), class: "text-indigo-600 hover:text-indigo-800 text-sm" %>
+</div>
+
+<h1 class="text-2xl font-bold text-gray-800 mb-6">Edit Holdings — <%= @policy.name %></h1>
+
+<div class="bg-white rounded-xl shadow p-6">
+  <%= form_with url: holding_path(@policy), method: :patch, local: true do |f| %>
+    <table class="w-full text-sm mb-6">
+      <thead>
+        <tr class="text-left text-gray-500 border-b">
+          <th class="pb-2">Fund</th>
+          <th class="pb-2">ISIN</th>
+          <th class="pb-2 text-right">Units</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @holdings.each_with_index do |holding, index| %>
+          <tr class="border-b border-gray-100">
+            <td class="py-3"><%= holding.fund.name %></td>
+            <td class="py-3 text-gray-500 font-mono text-xs"><%= holding.fund.isin %></td>
+            <td class="py-3 text-right">
+              <input type="hidden" name="holdings[<%= index %>][fund_id]" value="<%= holding.fund_id %>">
+              <input type="number" name="holdings[<%= index %>][units]" value="<%= holding.units %>"
+                     step="0.000001" min="0"
+                     class="w-40 text-right border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <div class="flex justify-end">
+      <%= f.submit "Save Holdings", class: "bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

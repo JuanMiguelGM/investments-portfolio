@@ -1,0 +1,41 @@
+<% content_for(:title, "Funds — Investments Portfolio") %>
+
+<h1 class="text-2xl font-bold text-gray-800 mb-6">Funds</h1>
+
+<div class="bg-white rounded-xl shadow overflow-hidden">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="text-left text-gray-500 border-b bg-gray-50">
+        <th class="px-5 py-3">Fund</th>
+        <th class="px-5 py-3">ISIN</th>
+        <th class="px-5 py-3 text-right">Allocation</th>
+        <th class="px-5 py-3 text-right">Latest NAV</th>
+        <th class="px-5 py-3 text-right">Daily Change</th>
+        <th class="px-5 py-3 text-right">Last Updated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @funds.each do |fund| %>
+        <% nav = fund.latest_nav %>
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="px-5 py-3">
+            <%= link_to fund.name, fund_path(fund), class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+          </td>
+          <td class="px-5 py-3 text-gray-500 font-mono text-xs"><%= fund.isin %></td>
+          <td class="px-5 py-3 text-right"><%= format_pct(fund.allocation_pct) %></td>
+          <td class="px-5 py-3 text-right font-medium"><%= nav ? format_euro(nav.nav) : "---" %></td>
+          <td class="px-5 py-3 text-right <%= gain_color(nav&.daily_change_pct) %>">
+            <% if nav&.daily_change_pct %>
+              <%= gain_sign(nav.daily_change_pct) %><%= format_pct(nav.daily_change_pct) %>
+            <% else %>
+              ---
+            <% end %>
+          </td>
+          <td class="px-5 py-3 text-right text-gray-500">
+            <%= nav ? nav.price_date.strftime("%d/%m/%Y") : "---" %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
