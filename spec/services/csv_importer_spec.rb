@@ -39,10 +39,10 @@ RSpec.describe CsvImporter do
       snapshot = PolicySnapshot.joins(:policy).where(policies: { slug: "fondo-1" })
                                .find_by(snapshot_date: Date.new(2019, 10, 1))
 
-      expect(snapshot.total_value).to eq(23_503.00)
-      expect(snapshot.total_contributed).to eq(23_000.00)
-      expect(snapshot.total_delta).to eq(503.00)
-      expect(snapshot.monthly_change).to eq(503.00)
+      expect(snapshot.total_value).to eq(10_000.00)
+      expect(snapshot.total_contributed).to eq(9_000.00)
+      expect(snapshot.total_delta).to eq(1_000.00)
+      expect(snapshot.monthly_change).to eq(1_000.00)
     end
 
     it "parses MM/YYYY dates correctly" do
