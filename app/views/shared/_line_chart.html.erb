@@ -1,0 +1,6 @@
+<div data-controller="chart"
+     data-chart-data-value="<%= data.to_json %>"
+     data-chart-multi-series-value="<%= local_assigns.fetch(:multi_series, false) %>"
+     style="height: 320px; position: relative;">
+  <canvas data-chart-target="canvas"></canvas>
+</div>
