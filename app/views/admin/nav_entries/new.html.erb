@@ -4,9 +4,10 @@
   <%= link_to "&larr; Back to Dashboard".html_safe, root_path, class: "text-indigo-600 hover:text-indigo-800 text-sm" %>
 </div>
 
-<h1 class="text-2xl font-bold text-gray-800 mb-6">Enter NAV Manually</h1>
+<h1 class="text-2xl font-bold text-gray-800 mb-2">Enter NAV Manually</h1>
+<p class="text-sm text-gray-500 mb-6">Record a NAV for funds without a Yahoo Finance ticker.</p>
 
-<div class="bg-white rounded-xl shadow p-6 max-w-lg">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-lg">
   <%= form_with url: admin_nav_entries_path, method: :post, local: true do |f| %>
     <% if @nav_entry.errors.any? %>
       <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
@@ -23,25 +24,25 @@
       <%= f.select :fund_id, @funds.map { |fund| [fund.name, fund.id] },
           { include_blank: "Select a fund", selected: @nav_entry.fund_id },
           name: "nav_entry[fund_id]",
-          class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+          class: "w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:border-indigo-500" %>
     </div>
 
     <div class="mb-4">
       <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
       <input type="date" name="nav_entry[price_date]" value="<%= @nav_entry.price_date || Date.current %>"
-             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:border-indigo-500">
     </div>
 
     <div class="mb-6">
       <label class="block text-sm font-medium text-gray-700 mb-1">NAV (&euro;)</label>
       <input type="number" name="nav_entry[nav]" value="<%= @nav_entry.nav %>"
              step="0.0001" min="0"
-             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-indigo-500 focus:border-indigo-500"
+             class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 focus:border-indigo-500"
              placeholder="e.g. 124.5000">
     </div>
 
     <div class="flex justify-end">
-      <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 cursor-pointer">
+      <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 cursor-pointer transition-colors">
         Save NAV
       </button>
     </div>
