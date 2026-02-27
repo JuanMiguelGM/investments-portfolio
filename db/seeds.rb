@@ -27,7 +27,7 @@ end
 policies_data = [
   { name: "Insurance Policy 1", slug: "policy-1", inception_date: Date.new(2019, 1, 1), policy_type: :insurance },
   { name: "Insurance Policy 2", slug: "policy-2", inception_date: Date.new(2020, 1, 1), policy_type: :insurance },
-  { name: "Pension Plan",       slug: "pp",        inception_date: Date.new(2019, 1, 1), policy_type: :pension  }
+  { name: "Pension Plan",       slug: "pp", inception_date: Date.new(2019, 1, 1), policy_type: :pension }
 ]
 
 policies_data.each do |attrs|
