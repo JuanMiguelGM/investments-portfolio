@@ -9,36 +9,40 @@
     <h1 class="text-2xl font-bold text-gray-800"><%= @policy.name %></h1>
     <p class="text-sm text-gray-500">Since <%= @policy.inception_date.strftime("%B %Y") %></p>
   </div>
-  <%= link_to "Edit Holdings", edit_holding_path(@policy), class: "bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700" %>
+  <%= link_to "Edit Holdings", edit_holding_path(@policy), class: "bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 transition-colors" %>
 </div>
 
-<!-- Metrics -->
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-  <div class="bg-white rounded-xl shadow p-5">
-    <p class="text-sm text-gray-500">Value</p>
-    <p class="text-2xl font-bold"><%= format_euro(@calculator.current_value) %></p>
+<!-- Hero Metric -->
+<div class="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl shadow-md p-6 mb-6 text-white">
+  <p class="text-indigo-200 text-sm font-medium">Current Value</p>
+  <p class="text-4xl font-bold tracking-tight mt-1"><%= format_euro(@calculator.current_value) %></p>
+</div>
+
+<!-- Supporting Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Contributed</p>
+    <p class="text-xl font-bold text-gray-900 mt-1"><%= format_euro(@calculator.total_contributed) %></p>
   </div>
-  <div class="bg-white rounded-xl shadow p-5">
-    <p class="text-sm text-gray-500">Contributed</p>
-    <p class="text-2xl font-bold"><%= format_euro(@calculator.total_contributed) %></p>
-  </div>
-  <div class="bg-white rounded-xl shadow p-5">
-    <p class="text-sm text-gray-500">Gain</p>
-    <p class="text-xl font-bold <%= gain_color(@calculator.total_gain) %>">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Gain</p>
+    <p class="text-xl font-bold <%= gain_color(@calculator.total_gain) %> mt-1">
       <%= gain_sign(@calculator.total_gain) %><%= format_euro(@calculator.total_gain) %>
-      <span class="text-sm">(<%= gain_sign(@calculator.total_gain_pct) %><%= format_pct(@calculator.total_gain_pct) %>)</span>
+    </p>
+    <p class="text-sm <%= gain_color(@calculator.total_gain_pct) %>">
+      <%= gain_sign(@calculator.total_gain_pct) %><%= format_pct(@calculator.total_gain_pct) %>
     </p>
   </div>
-  <div class="bg-white rounded-xl shadow p-5">
-    <p class="text-sm text-gray-500">Daily Change</p>
-    <p class="text-xl font-bold <%= gain_color(@calculator.daily_change) %>">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+    <p class="text-xs text-gray-500 uppercase tracking-wide">Daily Change</p>
+    <p class="text-xl font-bold <%= gain_color(@calculator.daily_change) %> mt-1">
       <%= gain_sign(@calculator.daily_change) %><%= format_euro(@calculator.daily_change) %>
     </p>
   </div>
 </div>
 
 <!-- Chart -->
-<div class="bg-white rounded-xl shadow p-5 mb-6">
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-lg font-semibold text-gray-800">Policy Value</h2>
     <div class="flex space-x-1">
@@ -50,7 +54,7 @@
     </div>
   </div>
   <% if @chart_data.any? %>
-    <%= line_chart @chart_data, prefix: "\u20AC", thousands: ".", decimal: ",", discrete: true, library: { scales: { y: { beginAtZero: false } } } %>
+    <%= render "shared/line_chart", data: @chart_data %>
   <% else %>
     <p class="text-gray-400 text-center py-12">No data for this period.</p>
   <% end %>
@@ -58,31 +62,31 @@
 
 <!-- Holdings -->
 <% if @holdings.any? %>
-  <div class="bg-white rounded-xl shadow p-5 mb-6">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
     <h2 class="text-lg font-semibold text-gray-800 mb-4">Holdings</h2>
     <table class="w-full text-sm">
       <thead>
         <tr class="text-left text-gray-500 border-b">
-          <th class="pb-2">Fund</th>
-          <th class="pb-2 text-right">Units</th>
-          <th class="pb-2 text-right">NAV</th>
-          <th class="pb-2 text-right">Value</th>
+          <th class="pb-3 px-4">Fund</th>
+          <th class="pb-3 px-4 text-right">Units</th>
+          <th class="pb-3 px-4 text-right">NAV</th>
+          <th class="pb-3 px-4 text-right">Value</th>
         </tr>
       </thead>
       <tbody>
         <% @holdings.each do |holding| %>
-          <tr class="border-b border-gray-100">
-            <td class="py-2">
+          <tr class="border-b border-gray-100 even:bg-gray-50 hover:bg-indigo-50 transition-colors">
+            <td class="py-3 px-4">
               <%= link_to holding.fund.name, fund_path(holding.fund), class: "text-indigo-600 hover:text-indigo-800" %>
             </td>
-            <td class="py-2 text-right font-mono"><%= number_with_precision(holding.units, precision: 6) %></td>
-            <td class="py-2 text-right"><%= format_euro(holding.fund.latest_nav_value) %></td>
-            <td class="py-2 text-right font-medium"><%= format_euro(holding.current_value) %></td>
+            <td class="py-3 px-4 text-right font-mono"><%= number_with_precision(holding.units, precision: 6) %></td>
+            <td class="py-3 px-4 text-right"><%= format_euro(holding.fund.latest_nav_value) %></td>
+            <td class="py-3 px-4 text-right font-medium"><%= format_euro(holding.current_value) %></td>
           </tr>
         <% end %>
         <tr class="font-bold">
-          <td class="py-2" colspan="3">Total</td>
-          <td class="py-2 text-right"><%= format_euro(@calculator.current_value) %></td>
+          <td class="py-3 px-4" colspan="3">Total</td>
+          <td class="py-3 px-4 text-right"><%= format_euro(@calculator.current_value) %></td>
         </tr>
       </tbody>
     </table>
@@ -91,20 +95,20 @@
 
 <!-- Contribution History -->
 <% if @contributions.any? %>
-  <div class="bg-white rounded-xl shadow p-5">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
     <h2 class="text-lg font-semibold text-gray-800 mb-4">Contributions</h2>
     <table class="w-full text-sm">
       <thead>
         <tr class="text-left text-gray-500 border-b">
-          <th class="pb-2">Date</th>
-          <th class="pb-2 text-right">Amount</th>
+          <th class="pb-3 px-4">Date</th>
+          <th class="pb-3 px-4 text-right">Amount</th>
         </tr>
       </thead>
       <tbody>
         <% @contributions.each do |contribution| %>
-          <tr class="border-b border-gray-100">
-            <td class="py-2"><%= contribution.contribution_date.strftime("%d/%m/%Y") %></td>
-            <td class="py-2 text-right font-medium"><%= format_euro(contribution.amount) %></td>
+          <tr class="border-b border-gray-100 even:bg-gray-50 hover:bg-indigo-50 transition-colors">
+            <td class="py-3 px-4"><%= contribution.contribution_date.strftime("%b %Y") %></td>
+            <td class="py-3 px-4 text-right font-medium"><%= format_euro(contribution.amount) %></td>
           </tr>
         <% end %>
       </tbody>
