@@ -2,7 +2,7 @@
 
 module YahooFinance
   class PriceFetcher
-    Result = Struct.new(:success, :prices_upserted, :errors, keyword_init: true)
+    Result = Struct.new(:success, :prices_upserted, :errors)
 
     def initialize(client: Client.new)
       @client = client

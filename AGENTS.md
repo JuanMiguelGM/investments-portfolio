@@ -38,7 +38,7 @@ bin/rails db:reset                   # Drop, create, migrate, seed
 
 ## Architecture Overview
 
-- **Framework**: Ruby on Rails 8.1, Ruby 3.4.7
+- **Framework**: Ruby on Rails 8.1, Ruby 4.0.1
 - **Database**: SQLite (local development, single-user app)
 - **CSS**: Tailwind CSS
 - **Charts**: Chartkick + Chart.js

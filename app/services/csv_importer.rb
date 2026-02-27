@@ -3,7 +3,7 @@
 require "csv"
 
 class CsvImporter
-  Result = Struct.new(:success, :snapshots_imported, :contributions_imported, :errors, keyword_init: true)
+  Result = Struct.new(:success, :snapshots_imported, :contributions_imported, :errors)
 
   # Maps CSV columns to policy slugs
   POLICY_COLUMNS = {

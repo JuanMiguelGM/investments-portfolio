@@ -35,8 +35,8 @@ module Portfolio
     def policy_chart_data(policy, period: "ALL")
       start_date = start_date_for(period)
       snapshots = policy.policy_snapshots.where(snapshot_date: start_date..).chronological
-      data = snapshots.each_with_object({}) do |snap, hash|
-        hash[snap.snapshot_date] = snap.total_value.to_f
+      data = snapshots.to_h do |snap|
+        [snap.snapshot_date, snap.total_value.to_f]
       end
 
       live = live_policy_data(policy, start_date)
