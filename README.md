@@ -2,6 +2,8 @@
 
 A personal, local Rails dashboard to track mutual funds across insurance policies and pension plans. Imports historical monthly data from CSV, fetches daily NAV prices from Yahoo Finance, and displays portfolio value, gains, and line charts broken down by policy.
 
+![Dashboard screenshot](docs/dashboard-screenshot.png)
+
 ## Features
 
 - **Multi-policy tracking** — insurance policies and pension plans, each with their own fund holdings
@@ -12,7 +14,7 @@ A personal, local Rails dashboard to track mutual funds across insurance policie
 
 ## Requirements
 
-- Ruby 3.4.7 (via asdf — see `.tool-versions`)
+- Ruby 4.0.1 (via asdf — see `.tool-versions`)
 - SQLite
 
 ## Setup
@@ -62,7 +64,7 @@ bundle exec rubocop  # 0 offenses
 
 ## Tech Stack
 
-- Ruby on Rails 8.1, Ruby 3.4.7, SQLite
+- Ruby on Rails 8.1, Ruby 4.0.1, SQLite
 - Tailwind CSS, Chartkick + Chart.js
 - RSpec, FactoryBot, WebMock
 - Faraday (Yahoo Finance), Solid Queue (background jobs)
